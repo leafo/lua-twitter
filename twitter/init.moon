@@ -30,6 +30,7 @@ class Twitter
   new: (@opts={}) =>
     @consumer_key = assert @opts.consumer_key, "missing consumer_key"
     @consumer_secret = assert @opts.consumer_secret, "missing consumer_secret"
+    @http_provider = opts.http
 
   http: =>
     unless @_http
@@ -102,11 +103,23 @@ class Twitter
 
     table.concat buffer
 
+  http_request: (opts) =>
+    if type(opts.source) == "string"
+      opts.headers or= {}
+      opts.headers["Content-Length"] = #opts.source
+      opts.source = ltn12.source.string opts.source
+
+    unless ngx
+      -- for luasec
+      opts.protocol = "sslv23"
+
+    @http!.request opts
+
   -- The access token returned by this apparently never expires and never changes?
   application_oauth_token: (code) =>
     out = {}
 
-    @http!.request {
+    @http_request {
       url: "#{@api_url}/oauth2/token"
       method: "POST"
       sink: ltn12.sink.table out
@@ -114,7 +127,7 @@ class Twitter
         "Authorization": "Basic #{@bearer_token!}"
         "Content-Type": "application/x-www-form-urlencoded"
       }
-      source: ltn12.source.string encode_query_string {
+      source: encode_query_string {
         grant_type: "client_credentials"
       }
     }
@@ -134,7 +147,7 @@ class Twitter
     if url_params
       url ..= "?" .. encode_query_string url_params
 
-    _, status = @http!.request {
+    _, status = @http_request {
       :url
       method: "GET"
       sink: ltn12.sink.table out
@@ -158,7 +171,7 @@ class Twitter
     url ..= "?" .. encode_query_string url_params if next url_params
 
     out = {}
-    _, status = @http!.request {
+    _, status = @http_request {
       :url
       method: "POST"
       sink: ltn12.sink.table out
@@ -184,7 +197,7 @@ class Twitter
     url ..= "?" .. encode_query_string url_params if next url_params
 
     out = {}
-    _, status = @http!.request {
+    _, status = @http_request {
       :url
       method: "POST"
       sink: ltn12.sink.table out
