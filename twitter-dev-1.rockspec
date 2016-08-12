@@ -6,7 +6,7 @@ source = {
 }
 
 description = {
-  summary = "",
+  summary = "A Lua twitter library that works with OpenResty or LuaSocket",
   homepage = "https://github.com/leafo/lua-twitter",
   license = "MIT"
 }
