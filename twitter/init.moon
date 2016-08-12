@@ -2,8 +2,9 @@
 import encode_query_string, parse_query_string, from_json from require "lapis.util"
 import hmac_sha1, encode_base64 from require "lapis.util.encoding"
 
--- luasocket's escape_uri function does not work, doesn't follow rfc
-escape = ngx.escape_uri
+-- luasocket's escape_uri function does not work, so we provide our own implementation
+escape = ngx and ngx.escape_uri or (str) ->
+  (str\gsub "([^A-Za-z0-9_%.-])", (c) -> "%%%02X"\format c\byte!)
 
 ltn12 = require "ltn12"
 

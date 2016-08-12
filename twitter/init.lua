@@ -8,7 +8,11 @@ do
   local _obj_0 = require("lapis.util.encoding")
   hmac_sha1, encode_base64 = _obj_0.hmac_sha1, _obj_0.encode_base64
 end
-local escape = ngx.escape_uri
+local escape = ngx and ngx.escape_uri or function(str)
+  return (str:gsub("([^A-Za-z0-9_%.-])", function(c)
+    return ("%%%02X"):format(c:byte())
+  end))
+end
 local ltn12 = require("ltn12")
 local generate_key
 generate_key = function(...)
@@ -139,9 +143,20 @@ do
       end
       return table.concat(buffer)
     end,
+    http_request = function(self, opts)
+      if type(opts.source) == "string" then
+        opts.headers = opts.headers or { }
+        opts.headers["Content-Length"] = #opts.source
+        opts.source = ltn12.source.string(opts.source)
+      end
+      if not (ngx) then
+        opts.protocol = "sslv23"
+      end
+      return self:http().request(opts)
+    end,
     application_oauth_token = function(self, code)
       local out = { }
-      self:http().request({
+      self:http_request({
         url = tostring(self.api_url) .. "/oauth2/token",
         method = "POST",
         sink = ltn12.sink.table(out),
@@ -149,9 +164,9 @@ do
           ["Authorization"] = "Basic " .. tostring(self:bearer_token()),
           ["Content-Type"] = "application/x-www-form-urlencoded"
         },
-        source = ltn12.source.string(encode_query_string({
+        source = encode_query_string({
           grant_type = "client_credentials"
-        }))
+        })
       })
       out = table.concat(out)
       out = from_json(out)
@@ -167,7 +182,7 @@ do
       if url_params then
         url = url .. ("?" .. encode_query_string(url_params))
       end
-      local _, status = self:http().request({
+      local _, status = self:http_request({
         url = url,
         method = "GET",
         sink = ltn12.sink.table(out),
@@ -190,7 +205,7 @@ do
         url = url .. ("?" .. encode_query_string(url_params))
       end
       local out = { }
-      local _, status = self:http().request({
+      local _, status = self:http_request({
         url = url,
         method = "POST",
         sink = ltn12.sink.table(out),
@@ -216,7 +231,7 @@ do
       end
       local out = { }
       local _
-      _, status = self:http().request({
+      _, status = self:http_request({
         url = url,
         method = "POST",
         sink = ltn12.sink.table(out),
@@ -242,6 +257,7 @@ do
       self.opts = opts
       self.consumer_key = assert(self.opts.consumer_key, "missing consumer_key")
       self.consumer_secret = assert(self.opts.consumer_secret, "missing consumer_secret")
+      self.http_provider = opts.http
     end,
     __base = _base_0,
     __name = "Twitter"
