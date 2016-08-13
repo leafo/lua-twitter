@@ -1,4 +1,22 @@
 
+generate_key = (...) ->
+  unpack = table.unpack or _G.unpack
+  import random from math
+
+  random_char = ->
+    switch random 1,3
+      when 1
+        random 65, 90
+      when 2
+        random 97, 122
+      when 3
+        random 48, 57
+
+
+  generate_key = (length) -> string.char unpack [ random_char! for i=1,length ]
+  generate_key ...
+
+
 class BigInt
   @from_decimal_string: (str) =>
     zero = "0"\byte!
@@ -89,5 +107,5 @@ class BigInt
 
     @, r
 
-{:BigInt}
+{:BigInt, :generate_key}
 

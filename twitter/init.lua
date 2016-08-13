@@ -14,35 +14,6 @@ local escape = ngx and ngx.escape_uri or function(str)
   end))
 end
 local ltn12 = require("ltn12")
-local generate_key
-generate_key = function(...)
-  local unpack = table.unpack or _G.unpack
-  local random
-  random = math.random
-  local random_char
-  random_char = function()
-    local _exp_0 = random(1, 3)
-    if 1 == _exp_0 then
-      return random(65, 90)
-    elseif 2 == _exp_0 then
-      return random(97, 122)
-    elseif 3 == _exp_0 then
-      return random(48, 57)
-    end
-  end
-  generate_key = function(length)
-    return string.char(unpack((function()
-      local _accum_0 = { }
-      local _len_0 = 1
-      for i = 1, length do
-        _accum_0[_len_0] = random_char()
-        _len_0 = _len_0 + 1
-      end
-      return _accum_0
-    end)()))
-  end
-  return generate_key(...)
-end
 local Twitter
 do
   local _class_0
@@ -119,6 +90,8 @@ do
       return encode_base64(hmac_sha1(secret, base_string))
     end,
     oauth_auth_header = function(self, token, ...)
+      local generate_key
+      generate_key = require("twitter.util").generate_key
       local auth_params = {
         oauth_nonce = generate_key(40),
         oauth_consumer_key = self.consumer_key,
@@ -273,9 +246,8 @@ do
           end
           local last_id = last_tweet.id_str
           local BigInt
-          BigInt = require("base58").BigInt
-          print("from string", last_id)
-          local id_int = BigInt:from_string(last_id)
+          BigInt = require("twitter.util").BigInt
+          local id_int = BigInt:from_decimal_string(last_id)
           id_int:add(-1)
           opts_clone.max_id = id_int:to_string()
         end
