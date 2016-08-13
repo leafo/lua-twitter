@@ -4,6 +4,17 @@
 
 A Lua library for working with the Twitter API.
 
+This library is designed to work with either LuaSocket or OpenResty's
+co-sockets via Lapis. If `ngx` is not in scope then the library will fall back
+to LuaSocket for network.
+
+`luasec` is required when using LuaSocket for `https` communication.
+
+# Install
+
+```bash
+luarocks install https://luarocks.org/manifests/leafo/twitter-dev-1.rockspec
+```
 
 # Reference
 
