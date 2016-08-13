@@ -213,7 +213,6 @@ class Twitter
     coroutine.wrap ->
       while true
         local last_tweet
-        print "requesting", require("moon").p opts_clone
         for tweet in *@get_timeline opts_clone
           coroutine.yield tweet
           last_tweet = tweet
@@ -225,7 +224,7 @@ class Twitter
         import BigInt from require "twitter.util"
         id_int = BigInt\from_decimal_string last_id
         id_int\add -1
-        opts_clone.max_id = id_int\to_string!
+        opts_clone.max_id = id_int\to_decimal_string!
 
 
 { :Twitter }

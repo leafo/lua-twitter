@@ -234,7 +234,6 @@ do
       return coroutine.wrap(function()
         while true do
           local last_tweet
-          print("requesting", require("moon").p(opts_clone))
           local _list_0 = self:get_timeline(opts_clone)
           for _index_0 = 1, #_list_0 do
             local tweet = _list_0[_index_0]
@@ -249,7 +248,7 @@ do
           BigInt = require("twitter.util").BigInt
           local id_int = BigInt:from_decimal_string(last_id)
           id_int:add(-1)
-          opts_clone.max_id = id_int:to_string()
+          opts_clone.max_id = id_int:to_decimal_string()
         end
       end)
     end
