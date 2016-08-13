@@ -202,27 +202,31 @@ do
       }))
       return parse_query_string(out)
     end,
-    status_update = function(self, status)
-      assert(status, "missing status")
+    post_status = function(self, opts)
+      if opts == nil then
+        opts = { }
+      end
+      assert(opts.status, "missing status")
       local out = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/1.1/statuses/update.json", {
-        access_token = assert(self.opts.access_token, "missing access token"),
-        access_token_secret = self.opts.access_token_secret,
+        access_token = assert(opts.access_token or self.opts.access_token, "missing access token"),
+        access_token_secret = opts.access_token_secret or self.opts.access_token_secret,
         get = {
-          status = status
+          status = opts.status
         }
       }))
       return from_json(out)
     end,
-    get_user = function(self, screen_name)
-      return self:_request("GET", "/1.1/users/show.json", {
-        include_entities = "false",
-        screen_name = assert(screen_name, "missing screen_name")
-      })
+    get_user = function(self, opts)
+      return self:_request("GET", "/1.1/users/show.json", opts)
     end,
-    get_timeline = function(self, opts)
+    get_user_timeline = function(self, opts)
       return self:_request("GET", "/1.1/statuses/user_timeline.json", opts)
     end,
-    get_each_tweet = function(self, opts)
+    user_timeline_each_tweet = function(self, opts)
+      if opts == nil then
+        opts = { }
+      end
+      opts.count = opts.count or 200
       local opts_clone
       do
         local _tbl_0 = { }

@@ -186,30 +186,29 @@ class Twitter
 
     parse_query_string out
 
-  status_update: (status) =>
-    assert status, "missing status"
+  post_status: (opts={}) =>
+    assert opts.status, "missing status"
 
     out = assert @_oauth_request "POST", "#{@api_url}/1.1/statuses/update.json", {
-      access_token: assert @opts.access_token, "missing access token"
-      access_token_secret: @opts.access_token_secret
+      access_token: assert opts.access_token or @opts.access_token, "missing access token"
+      access_token_secret: opts.access_token_secret or @opts.access_token_secret
       get: {
-        :status
+        status: opts.status
       }
     }
 
     from_json out
 
-  get_user: (screen_name) =>
-    @_request "GET", "/1.1/users/show.json", {
-      include_entities: "false"
-      screen_name: assert screen_name, "missing screen_name"
-    }
+  get_user: (opts) =>
+    @_request "GET", "/1.1/users/show.json", opts
 
-  get_timeline: (opts) =>
+  get_user_timeline: (opts) =>
     @_request "GET", "/1.1/statuses/user_timeline.json", opts
 
-  get_each_tweet:  (opts) =>
+  user_timeline_each_tweet:  (opts={}) =>
+    opts.count or= 200
     opts_clone = {k,v for k,v in pairs opts}
+
     coroutine.wrap ->
       while true
         local last_tweet

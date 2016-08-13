@@ -54,16 +54,18 @@ describe "twitter", ->
       responders["users/show.json"] = =>
         "{}", 200
 
-      out = twitter\get_user "leafo"
+      out = twitter\get_user {
+        screen_name: "leafo"
+      }
       assert.same {}, out
 
-    it "status_update", ->
+    it "post_status", ->
       twitter.opts.access_token = "hello"
       twitter.opts.access_token_secret = "world"
 
       responders["statuses/update.json"] = => "{}", 200
 
-      out = twitter\status_update "hi"
+      out = twitter\post_status status: "hi"
       assert.same {}, out
 
 
