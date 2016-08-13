@@ -70,7 +70,7 @@ do
     end,
     access_token = function(self)
       if not (self._access_token) then
-        self._access_token = assert(self:application_oauth_token())
+        self._access_token = assert(self:application_oauth_token(), "failed to get access token")
       end
       return self._access_token
     end,
@@ -175,7 +175,7 @@ do
       end
       return out.access_token
     end,
-    _request = function(self, url, url_params)
+    _request = function(self, method, url, url_params)
       local access_token = self:access_token()
       local out = { }
       url = tostring(self.api_url) .. tostring(url)
@@ -184,7 +184,7 @@ do
       end
       local _, status = self:http_request({
         url = url,
-        method = "GET",
+        method = method,
         sink = ltn12.sink.table(out),
         headers = {
           ["Authorization"] = "Bearer " .. tostring(access_token)
@@ -194,20 +194,22 @@ do
       out = from_json(out)
       return out, status
     end,
-    request_token = function(self)
-      local url = tostring(self.api_url) .. "/oauth/request_token"
-      local url_params = {
-        oauth_callback = self.opts.oauth_callback
-      }
-      local post_params = { }
-      local auth = self:oauth_auth_header(nil, nil, "POST", url, url_params, post_params)
+    _oauth_request = function(self, method, url, opts)
+      if opts == nil then
+        opts = { }
+      end
+      local url_params = opts.get or { }
+      local post_params = opts.post or { }
+      local access_token, access_token_secret
+      access_token, access_token_secret = opts.access_token, opts.access_token_secret
+      local auth = self:oauth_auth_header(access_token, access_token_secret, method, url, url_params, post_params)
       if next(url_params) then
         url = url .. ("?" .. encode_query_string(url_params))
       end
       local out = { }
       local _, status = self:http_request({
         url = url,
-        method = "POST",
+        method = method,
         sink = ltn12.sink.table(out),
         headers = {
           ["Authorization"] = auth
@@ -217,32 +219,29 @@ do
       if not (status == 200) then
         return nil, out
       end
+      return out
+    end,
+    request_token = function(self)
+      local out = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/request_token", {
+        get = {
+          oauth_callback = self.opts.oauth_callback
+        }
+      }))
       return parse_query_string(out)
     end,
     status_update = function(self, status)
-      local url = tostring(self.api_url) .. "/1.1/statuses/update.json"
-      local url_params = {
-        status = status
-      }
-      local post_params = { }
-      local auth = self:oauth_auth_header("", "", "POST", url, url_params, post_params)
-      if next(url_params) then
-        url = url .. ("?" .. encode_query_string(url_params))
-      end
-      local out = { }
-      local _
-      _, status = self:http_request({
-        url = url,
-        method = "POST",
-        sink = ltn12.sink.table(out),
-        headers = {
-          ["Authorization"] = auth
+      assert(status, "missing status")
+      local out = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/1.1/statuses/update.json", {
+        access_token = assert(self.opts.access_token, "missing access token"),
+        access_token_secret = self.opts.access_token_secret,
+        get = {
+          status = status
         }
-      })
-      return table.concat(out), status
+      }))
+      return from_json(out)
     end,
     get_user = function(self, screen_name)
-      return self:_request("/1.1/users/show.json", {
+      return self:_request("GET", "/1.1/users/show.json", {
         include_entities = "false",
         screen_name = assert(screen_name, "missing screen name")
       })

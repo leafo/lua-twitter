@@ -52,7 +52,7 @@ class Twitter
 
   access_token: =>
     unless @_access_token
-      @_access_token = assert @application_oauth_token!
+      @_access_token = assert @application_oauth_token!, "failed to get access token"
 
     @_access_token
 
@@ -78,6 +78,7 @@ class Twitter
 
     encode_base64 hmac_sha1 secret, base_string
 
+  -- args: token, token_secret, method, base_url, url_params, post_params
   oauth_auth_header: (token, ...) =>
     auth_params = {
       oauth_nonce: generate_key 40
@@ -140,7 +141,8 @@ class Twitter
 
     out.access_token
 
-  _request: (url, url_params) =>
+  -- makes a request using an access token
+  _request: (method, url, url_params) =>
     access_token = @access_token!
 
     out = {}
@@ -150,7 +152,7 @@ class Twitter
 
     _, status = @http_request {
       :url
-      method: "GET"
+      method: method
       sink: ltn12.sink.table out
       headers: {
         "Authorization": "Bearer #{access_token}"
@@ -161,20 +163,21 @@ class Twitter
     out = from_json out
     out, status
 
-  request_token: =>
-    url = "#{@api_url}/oauth/request_token"
+  -- makes a signed oauth request
+  _oauth_request: (method, url, opts={}) =>
+    url_params = opts.get or {}
+    post_params = opts.post or {}
+    {:access_token, :access_token_secret} = opts
 
-    url_params = { oauth_callback: @opts.oauth_callback }
-    post_params = {}
-
-    auth = @oauth_auth_header nil, nil, "POST", url, url_params, post_params
+    auth = @oauth_auth_header access_token, access_token_secret,
+      method, url, url_params, post_params
 
     url ..= "?" .. encode_query_string url_params if next url_params
 
     out = {}
     _, status = @http_request {
       :url
-      method: "POST"
+      method: method
       sink: ltn12.sink.table out
       headers: {
         "Authorization": auth
@@ -186,31 +189,32 @@ class Twitter
     unless status == 200
       return nil, out
 
-    parse_query_string out
+    out
 
-  status_update: (status) =>
-    url = "#{@api_url}/1.1/statuses/update.json"
-    url_params = { :status }
-    post_params = {}
-
-    auth = @oauth_auth_header "", "", "POST", url, url_params, post_params
-
-    url ..= "?" .. encode_query_string url_params if next url_params
-
-    out = {}
-    _, status = @http_request {
-      :url
-      method: "POST"
-      sink: ltn12.sink.table out
-      headers: {
-        "Authorization": auth
+  request_token: =>
+    out = assert @_oauth_request "POST", "#{@api_url}/oauth/request_token", {
+      get: {
+       oauth_callback: @opts.oauth_callback
       }
     }
 
-    table.concat(out), status
+    parse_query_string out
+
+  status_update: (status) =>
+    assert status, "missing status"
+
+    out = assert @_oauth_request "POST", "#{@api_url}/1.1/statuses/update.json", {
+      access_token: assert @opts.access_token, "missing access token"
+      access_token_secret: @opts.access_token_secret
+      get: {
+        :status
+      }
+    }
+
+    from_json out
 
   get_user: (screen_name) =>
-    @_request "/1.1/users/show.json", {
+    @_request "GET", "/1.1/users/show.json", {
       include_entities: "false"
       screen_name: assert screen_name, "missing screen name"
     }
