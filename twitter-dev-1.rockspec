@@ -16,12 +16,13 @@ dependencies = {
   "luasocket",
   "lua-cjson",
   "luasec",
+  "lapis",
 }
 
 build = {
   type = "builtin",
   modules = {
-		["twitter"] = "twitter/init.lua",
+    ["twitter"] = "twitter/init.lua",
   }
 }
 
