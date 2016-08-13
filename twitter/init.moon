@@ -216,7 +216,31 @@ class Twitter
   get_user: (screen_name) =>
     @_request "GET", "/1.1/users/show.json", {
       include_entities: "false"
-      screen_name: assert screen_name, "missing screen name"
+      screen_name: assert screen_name, "missing screen_name"
     }
+
+  get_timeline: (opts) =>
+    @_request "GET", "/1.1/statuses/user_timeline.json", opts
+
+  get_each_tweet:  (opts) =>
+    opts_clone = {k,v for k,v in pairs opts}
+    coroutine.wrap ->
+      while true
+        local last_tweet
+        print "requesting", require("moon").p opts_clone
+        for tweet in *@get_timeline opts_clone
+          coroutine.yield tweet
+          last_tweet = tweet
+
+        break unless last_tweet
+
+        last_id = last_tweet.id_str
+
+        import BigInt from require "base58"
+        print "from string", last_id
+        id_int = BigInt\from_string last_id
+        id_int\add -1
+        opts_clone.max_id = id_int\to_string!
+
 
 { :Twitter }

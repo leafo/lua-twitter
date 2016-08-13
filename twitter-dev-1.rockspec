@@ -17,6 +17,7 @@ dependencies = {
   "lua-cjson",
   "luasec",
   "lapis",
+  "base58",
 }
 
 build = {

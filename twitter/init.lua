@@ -243,8 +243,43 @@ do
     get_user = function(self, screen_name)
       return self:_request("GET", "/1.1/users/show.json", {
         include_entities = "false",
-        screen_name = assert(screen_name, "missing screen name")
+        screen_name = assert(screen_name, "missing screen_name")
       })
+    end,
+    get_timeline = function(self, opts)
+      return self:_request("GET", "/1.1/statuses/user_timeline.json", opts)
+    end,
+    get_each_tweet = function(self, opts)
+      local opts_clone
+      do
+        local _tbl_0 = { }
+        for k, v in pairs(opts) do
+          _tbl_0[k] = v
+        end
+        opts_clone = _tbl_0
+      end
+      return coroutine.wrap(function()
+        while true do
+          local last_tweet
+          print("requesting", require("moon").p(opts_clone))
+          local _list_0 = self:get_timeline(opts_clone)
+          for _index_0 = 1, #_list_0 do
+            local tweet = _list_0[_index_0]
+            coroutine.yield(tweet)
+            last_tweet = tweet
+          end
+          if not (last_tweet) then
+            break
+          end
+          local last_id = last_tweet.id_str
+          local BigInt
+          BigInt = require("base58").BigInt
+          print("from string", last_id)
+          local id_int = BigInt:from_string(last_id)
+          id_int:add(-1)
+          opts_clone.max_id = id_int:to_string()
+        end
+      end)
     end
   }
   _base_0.__index = _base_0
