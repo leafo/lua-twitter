@@ -45,7 +45,7 @@ local user = twitter:get_user({
 })
 ```
 
-# `get_user_timeline(opts={})`
+### `get_user_timeline(opts={})`
 
 https://dev.twitter.com/rest/reference/get/statuses/user_timeline
 
