@@ -212,7 +212,7 @@ class Twitter
     coroutine.wrap ->
       while true
         local last_tweet
-        for tweet in *@get_timeline opts_clone
+        for tweet in *@get_user_timeline opts_clone
           coroutine.yield tweet
           last_tweet = tweet
 

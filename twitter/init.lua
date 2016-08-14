@@ -238,7 +238,7 @@ do
       return coroutine.wrap(function()
         while true do
           local last_tweet
-          local _list_0 = self:get_timeline(opts_clone)
+          local _list_0 = self:get_user_timeline(opts_clone)
           for _index_0 = 1, #_list_0 do
             local tweet = _list_0[_index_0]
             coroutine.yield(tweet)
