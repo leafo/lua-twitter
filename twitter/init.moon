@@ -15,8 +15,9 @@ class Twitter
   new: (@opts={}) =>
     if @opts.access_token or @opts.access_token_secret
       @access_token = assert @opts.access_token, "missing access token"
-      @access_token = assert @opts.access_token_secret, "missing access_token_secret"
-    else
+      @access_token_secret = assert @opts.access_token_secret, "missing access_token_secret"
+
+    if @opts.consumer_key or @opts.consumer_secret
       @consumer_key = assert @opts.consumer_key, "missing consumer_key"
       @consumer_secret = assert @opts.consumer_secret, "missing consumer_secret"
 
@@ -197,8 +198,8 @@ class Twitter
     assert opts.status, "missing status"
 
     out = assert @_oauth_request "POST", "#{@api_url}/1.1/statuses/update.json", {
-      access_token: assert opts.access_token or @opts.access_token, "missing access token"
-      access_token_secret: opts.access_token_secret or @opts.access_token_secret
+      access_token: assert opts.access_token or @access_token, "missing access token"
+      access_token_secret: opts.access_token_secret or @access_token_secret
       get: {
         status: opts.status
       }

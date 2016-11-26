@@ -209,8 +209,8 @@ do
       end
       assert(opts.status, "missing status")
       local out = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/1.1/statuses/update.json", {
-        access_token = assert(opts.access_token or self.opts.access_token, "missing access token"),
-        access_token_secret = opts.access_token_secret or self.opts.access_token_secret,
+        access_token = assert(opts.access_token or self.access_token, "missing access token"),
+        access_token_secret = opts.access_token_secret or self.access_token_secret,
         get = {
           status = opts.status
         }
@@ -267,8 +267,9 @@ do
       self.opts = opts
       if self.opts.access_token or self.opts.access_token_secret then
         self.access_token = assert(self.opts.access_token, "missing access token")
-        self.access_token = assert(self.opts.access_token_secret, "missing access_token_secret")
-      else
+        self.access_token_secret = assert(self.opts.access_token_secret, "missing access_token_secret")
+      end
+      if self.opts.consumer_key or self.opts.consumer_secret then
         self.consumer_key = assert(self.opts.consumer_key, "missing consumer_key")
         self.consumer_secret = assert(self.opts.consumer_secret, "missing consumer_secret")
       end
