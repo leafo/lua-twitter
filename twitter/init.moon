@@ -13,8 +13,13 @@ class Twitter
   api_url: "https://api.twitter.com"
 
   new: (@opts={}) =>
-    @consumer_key = assert @opts.consumer_key, "missing consumer_key"
-    @consumer_secret = assert @opts.consumer_secret, "missing consumer_secret"
+    if @opts.access_token or @opts.access_token_secret
+      @access_token = assert @opts.access_token, "missing access token"
+      @access_token = assert @opts.access_token_secret, "missing access_token_secret"
+    else
+      @consumer_key = assert @opts.consumer_key, "missing consumer_key"
+      @consumer_secret = assert @opts.consumer_secret, "missing consumer_secret"
+
     @http_provider = opts.http
 
   http: =>
@@ -34,11 +39,11 @@ class Twitter
   bearer_token: =>
     encode_base64 escape(@consumer_key) .. ":" .. escape(@consumer_secret)
 
-  access_token: =>
-    unless @_access_token
-      @_access_token = assert @application_oauth_token!, "failed to get access token"
+  get_access_token: =>
+    unless @access_token
+      @access_token = assert @application_oauth_token!, "failed to get access token"
 
-    @_access_token
+    @access_token
 
   oauth_signature:  (auth_params, token_secret, method, base_url, url_params={}, post_params={}) =>
     joined_params = {}
@@ -105,6 +110,8 @@ class Twitter
 
   -- The access token returned by this apparently never expires and never changes?
   application_oauth_token: (code) =>
+    assert @consumer_key, "need consumer key to get application oauth token"
+
     out = {}
 
     @http_request {
@@ -129,7 +136,7 @@ class Twitter
 
   -- makes a request using an access token
   _request: (method, url, url_params) =>
-    access_token = @access_token!
+    access_token = @get_access_token!
 
     out = {}
     url = "#{@api_url}#{url}"

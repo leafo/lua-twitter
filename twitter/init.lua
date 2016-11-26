@@ -39,11 +39,11 @@ do
     bearer_token = function(self)
       return encode_base64(escape(self.consumer_key) .. ":" .. escape(self.consumer_secret))
     end,
-    access_token = function(self)
-      if not (self._access_token) then
-        self._access_token = assert(self:application_oauth_token(), "failed to get access token")
+    get_access_token = function(self)
+      if not (self.access_token) then
+        self.access_token = assert(self:application_oauth_token(), "failed to get access token")
       end
-      return self._access_token
+      return self.access_token
     end,
     oauth_signature = function(self, auth_params, token_secret, method, base_url, url_params, post_params)
       if url_params == nil then
@@ -128,6 +128,7 @@ do
       return self:http().request(opts)
     end,
     application_oauth_token = function(self, code)
+      assert(self.consumer_key, "need consumer key to get application oauth token")
       local out = { }
       self:http_request({
         url = tostring(self.api_url) .. "/oauth2/token",
@@ -149,7 +150,7 @@ do
       return out.access_token
     end,
     _request = function(self, method, url, url_params)
-      local access_token = self:access_token()
+      local access_token = self:get_access_token()
       local out = { }
       url = tostring(self.api_url) .. tostring(url)
       if url_params then
@@ -264,8 +265,13 @@ do
         opts = { }
       end
       self.opts = opts
-      self.consumer_key = assert(self.opts.consumer_key, "missing consumer_key")
-      self.consumer_secret = assert(self.opts.consumer_secret, "missing consumer_secret")
+      if self.opts.access_token or self.opts.access_token_secret then
+        self.access_token = assert(self.opts.access_token, "missing access token")
+        self.access_token = assert(self.opts.access_token_secret, "missing access_token_secret")
+      else
+        self.consumer_key = assert(self.opts.consumer_key, "missing consumer_key")
+        self.consumer_secret = assert(self.opts.consumer_secret, "missing consumer_secret")
+      end
       self.http_provider = opts.http
     end,
     __base = _base_0,
