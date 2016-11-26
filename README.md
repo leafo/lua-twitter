@@ -18,11 +18,11 @@ luarocks install https://luarocks.org/manifests/leafo/twitter-dev-1.rockspec
 
 # Reference
 
-There are a few ways to authenticate with the Twitter API. The easiest way is
-to request without a user context using your Twitter application keys.  You'll
-need a `consumer_key` and `consumer_secret`
+Before getting started you'll need a *consumer key* and *consumer secret*. To
+get those you'll need to create an app at <https://apps.twitter.com>.
 
-Create a Twitter API client like this: 
+There are a few ways to authenticate with the Twitter API. The easiest way is
+to request without a user context using the cosnumer keys:
 
 ```lua
 local Twitter = require("twitter").Twitter
@@ -32,6 +32,26 @@ local twitter = Twitter({
   consumer_secret = "ABCABCABACABACACB"
 })
 ```
+
+If you want to do things like post statuses and upload images using the account
+that owns the consumer keys then you can generate a access token and secret
+from <https://apps.twitter.com> and use them like so:
+
+```lua
+local Twitter = require("twitter").Twitter
+
+local twitter = Twitter({
+  consumer_key = "XXXXXXX",
+  consumer_secret = "ABCABCABACABACACB",
+  access_token = "abcdefg-123456",
+  access_token_secret = "awkeftSECretgwKWARKW"
+})
+```
+
+# Methods
+
+All of the following methods are available on an instance of the `Twitter`
+class provided by the `twitter` module.
 
 ### `get_user(opts={})`
 
@@ -81,12 +101,27 @@ This requires authentication with a user context. You can get an access token
 for your own account from <https://apps.twitter.com/>.
 
 ```lua
-local user = twitter:post_status({
-  access_token = "xxx",
-  access_token_secret = "abcabcabcabcabc",
+local user = assert(twitter:post_status({
   status = "Hello, this my tweet"
+}))
+```
+### `post_media_upload(opts={})`
+
+Uploads a image or video to Twitter, returns the media object. You can attach
+the media object to a status update by including the id returned by this call
+in the `post_status` method.
+
+```lua
+local media = assert(twitter:post_media_upload({
+  filename = "mything.gif"
+}))
+
+assert(twitter:post_status {
+  status = "feeling itchy pt. 3",
+  media_ids = media.media_id_string
 })
 ```
+
 
 # Contact
 
