@@ -1,4 +1,5 @@
-local url = require("socket.url")
+local escape_uri
+escape_uri = require("twitter.util").escape_uri
 local insert, concat
 do
   local _obj_0 = table
@@ -99,7 +100,7 @@ encode_multipart = function(params)
     for _index_0 = 1, #tuples do
       local tuple = tuples[_index_0]
       local k, v = unpack(tuple)
-      k = url.escape(k)
+      k = escape_uri(k)
       local buffer = {
         'Content-Disposition: form-data; name="' .. k .. '"'
       }

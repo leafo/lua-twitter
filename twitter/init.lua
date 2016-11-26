@@ -8,11 +8,8 @@ do
   local _obj_0 = require("lapis.util.encoding")
   hmac_sha1, encode_base64 = _obj_0.hmac_sha1, _obj_0.encode_base64
 end
-local escape = ngx and ngx.escape_uri or function(str)
-  return (str:gsub("([^A-Za-z0-9_%.-])", function(c)
-    return ("%%%02X"):format(c:byte())
-  end))
-end
+local escape_uri
+escape_uri = require("twitter.util").escape_uri
 local ltn12 = require("ltn12")
 local Twitter
 do
@@ -37,7 +34,7 @@ do
       return self._http
     end,
     bearer_token = function(self)
-      return encode_base64(escape(self.consumer_key) .. ":" .. escape(self.consumer_secret))
+      return encode_base64(escape_uri(self.consumer_key) .. ":" .. escape_uri(self.consumer_secret))
     end,
     get_access_token = function(self)
       if not (self.access_token) then
@@ -75,7 +72,7 @@ do
         local _len_0 = 1
         for _index_0 = 1, #joined_params do
           local t = joined_params[_index_0]
-          _accum_0[_len_0] = tostring(escape(t[1])) .. "=" .. tostring(escape(t[2]))
+          _accum_0[_len_0] = tostring(escape_uri(t[1])) .. "=" .. tostring(escape_uri(t[2]))
           _len_0 = _len_0 + 1
         end
         joined_params = _accum_0
@@ -83,10 +80,10 @@ do
       joined_params = table.concat(joined_params, "&")
       local base_string = table.concat({
         method:upper(),
-        escape(base_url),
-        escape(joined_params)
+        escape_uri(base_url),
+        escape_uri(joined_params)
       }, "&")
-      local secret = escape(self.consumer_secret) .. "&" .. escape(token_secret or "")
+      local secret = escape_uri(self.consumer_secret) .. "&" .. escape_uri(token_secret or "")
       return encode_base64(hmac_sha1(secret, base_string))
     end,
     oauth_auth_header = function(self, token, ...)
@@ -105,9 +102,9 @@ do
         "OAuth "
       }
       for k, v in pairs(auth_params) do
-        table.insert(buffer, escape(k))
+        table.insert(buffer, escape_uri(k))
         table.insert(buffer, '="')
-        table.insert(buffer, escape(v))
+        table.insert(buffer, escape_uri(v))
         table.insert(buffer, '"')
         table.insert(buffer, ", ")
       end
@@ -227,13 +224,11 @@ do
       local out = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/1.1/statuses/update.json", {
         access_token = assert(opts.access_token or self.access_token, "missing access token"),
         access_token_secret = opts.access_token_secret or self.access_token_secret,
-        get = {
-          status = opts.status
-        }
+        get = opts
       }))
       return from_json(out)
     end,
-    media_upload = function(self, opts)
+    post_media_upload = function(self, opts)
       if opts == nil then
         opts = { }
       end

@@ -1,13 +1,9 @@
 
 import encode_query_string, parse_query_string, from_json from require "lapis.util"
 import hmac_sha1, encode_base64 from require "lapis.util.encoding"
-
--- luasocket's escape_uri function does not work, so we provide our own implementation
-escape = ngx and ngx.escape_uri or (str) ->
-  (str\gsub "([^A-Za-z0-9_%.-])", (c) -> "%%%02X"\format c\byte!)
+import escape_uri from require "twitter.util"
 
 ltn12 = require "ltn12"
-
 
 class Twitter
   api_url: "https://api.twitter.com"
@@ -38,7 +34,7 @@ class Twitter
     @_http
 
   bearer_token: =>
-    encode_base64 escape(@consumer_key) .. ":" .. escape(@consumer_secret)
+    encode_base64 escape_uri(@consumer_key) .. ":" .. escape_uri(@consumer_secret)
 
   get_access_token: =>
     unless @access_token
@@ -55,16 +51,16 @@ class Twitter
 
     table.sort joined_params, (a,b) -> a[1] < b[1]
 
-    joined_params = ["#{escape t[1]}=#{escape t[2]}" for t in *joined_params]
+    joined_params = ["#{escape_uri t[1]}=#{escape_uri t[2]}" for t in *joined_params]
     joined_params = table.concat joined_params, "&"
 
     base_string = table.concat {
       method\upper!
-      escape base_url
-      escape joined_params
+      escape_uri base_url
+      escape_uri joined_params
     }, "&"
 
-    secret = escape(@consumer_secret) .. "&" .. escape(token_secret or "")
+    secret = escape_uri(@consumer_secret) .. "&" .. escape_uri(token_secret or "")
 
     encode_base64 hmac_sha1 secret, base_string
 
@@ -86,9 +82,9 @@ class Twitter
     buffer = {"OAuth "}
 
     for k, v in pairs auth_params
-      table.insert buffer, escape k
+      table.insert buffer, escape_uri k
       table.insert buffer, '="'
-      table.insert buffer, escape v
+      table.insert buffer, escape_uri v
       table.insert buffer, '"'
       table.insert buffer, ", "
 
@@ -216,14 +212,12 @@ class Twitter
     out = assert @_oauth_request "POST", "#{@api_url}/1.1/statuses/update.json", {
       access_token: assert opts.access_token or @access_token, "missing access token"
       access_token_secret: opts.access_token_secret or @access_token_secret
-      get: {
-        status: opts.status
-      }
+      get: opts
     }
 
     from_json out
 
-  media_upload: (opts={}) =>
+  post_media_upload: (opts={}) =>
     import File, encode_multipart from require "twitter.multipart"
     file = File assert opts.filename, "missing file"
 

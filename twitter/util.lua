@@ -1,3 +1,8 @@
+local escape_uri = ngx and ngx.escape_uri or function(str)
+  return (str:gsub("([^A-Za-z0-9_%.-])", function(c)
+    return ("%%%02X"):format(c:byte())
+  end))
+end
 local generate_key
 generate_key = function(...)
   local unpack = table.unpack or _G.unpack
@@ -167,5 +172,6 @@ do
 end
 return {
   BigInt = BigInt,
-  generate_key = generate_key
+  generate_key = generate_key,
+  escape_uri = escape_uri
 }

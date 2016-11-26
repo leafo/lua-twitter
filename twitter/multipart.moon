@@ -1,5 +1,5 @@
-url = require "socket.url"
 
+import escape_uri from require "twitter.util"
 import insert, concat from table
 
 math.randomseed os.time!
@@ -44,7 +44,7 @@ encode_multipart = (params) ->
   chunks = for tuple in *tuples
     k,v = unpack tuple
 
-    k = url.escape k
+    k = escape_uri k
     buffer = { 'Content-Disposition: form-data; name="'.. k .. '"' }
 
     content = if type(v) == "table" and v.__class == File

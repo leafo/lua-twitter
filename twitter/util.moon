@@ -1,3 +1,6 @@
+-- luasocket's escape_uri function does not work, so we provide our own implementation
+escape_uri = ngx and ngx.escape_uri or (str) ->
+  (str\gsub "([^A-Za-z0-9_%.-])", (c) -> "%%%02X"\format c\byte!)
 
 generate_key = (...) ->
   unpack = table.unpack or _G.unpack
@@ -107,5 +110,5 @@ class BigInt
 
     @, r
 
-{:BigInt, :generate_key}
+{:BigInt, :generate_key, :escape_uri}
 
