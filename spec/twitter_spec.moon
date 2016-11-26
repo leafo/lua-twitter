@@ -60,8 +60,8 @@ describe "twitter", ->
       assert.same {}, out
 
     it "post_status", ->
-      twitter.opts.access_token = "hello"
-      twitter.opts.access_token_secret = "world"
+      twitter.access_token = "hello"
+      twitter.access_token_secret = "world"
 
       responders["statuses/update.json"] = => "{}", 200
 

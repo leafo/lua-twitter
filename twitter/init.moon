@@ -188,7 +188,7 @@ class Twitter
   request_token: =>
     out = assert @_oauth_request "POST", "#{@api_url}/oauth/request_token", {
       get: {
-       oauth_callback: @opts.oauth_callback
+        oauth_callback: @opts.oauth_callback
       }
     }
 
