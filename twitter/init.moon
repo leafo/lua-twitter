@@ -168,20 +168,36 @@ class Twitter
 
     url ..= "?" .. encode_query_string url_params if next url_params
 
+
+    headers = {
+      "Authorization": auth
+    }
+
+    if opts.headers
+      for k, v in pairs opts.headers
+        headers[k] = v
+
+    body = if opts.body
+      opts.body
+    else
+      encode_query_string post_params
+
+    if body
+      headers["Content-Length"] = #body
+
     out = {}
     _, status = @http_request {
       :url
       method: method
       sink: ltn12.sink.table out
-      headers: {
-        "Authorization": auth
-      }
+      source: body and ltn12.source.string(body) or nil
+      :headers
     }
 
     out = table.concat(out)
 
     unless status == 200
-      return nil, out
+      return nil, out != "" and out or "status #{status}"
 
     out
 
@@ -206,6 +222,26 @@ class Twitter
     }
 
     from_json out
+
+  media_upload: (opts={}) =>
+    import File, encode_multipart from require "twitter.multipart"
+    file = File assert opts.filename, "missing file"
+
+    body, boundary = encode_multipart {
+      media: file
+    }
+
+    out = assert @_oauth_request "POST", "https://upload.twitter.com/1.1/media/upload.json", {
+      access_token: assert opts.access_token or @access_token, "missing access token"
+      access_token_secret: opts.access_token_secret or @access_token_secret
+      :body
+      headers: {
+        "Content-Type": "multipart/mixed; boundary=#{boundary}"
+      }
+    }
+
+    from_json out
+
 
   get_user: (opts) =>
     @_request "GET", "/1.1/users/show.json", opts

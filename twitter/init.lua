@@ -180,18 +180,34 @@ do
       if next(url_params) then
         url = url .. ("?" .. encode_query_string(url_params))
       end
+      local headers = {
+        ["Authorization"] = auth
+      }
+      if opts.headers then
+        for k, v in pairs(opts.headers) do
+          headers[k] = v
+        end
+      end
+      local body
+      if opts.body then
+        body = opts.body
+      else
+        body = encode_query_string(post_params)
+      end
+      if body then
+        headers["Content-Length"] = #body
+      end
       local out = { }
       local _, status = self:http_request({
         url = url,
         method = method,
         sink = ltn12.sink.table(out),
-        headers = {
-          ["Authorization"] = auth
-        }
+        source = body and ltn12.source.string(body) or nil,
+        headers = headers
       })
       out = table.concat(out)
       if not (status == 200) then
-        return nil, out
+        return nil, out ~= "" and out or "status " .. tostring(status)
       end
       return out
     end,
@@ -213,6 +229,29 @@ do
         access_token_secret = opts.access_token_secret or self.access_token_secret,
         get = {
           status = opts.status
+        }
+      }))
+      return from_json(out)
+    end,
+    media_upload = function(self, opts)
+      if opts == nil then
+        opts = { }
+      end
+      local File, encode_multipart
+      do
+        local _obj_0 = require("twitter.multipart")
+        File, encode_multipart = _obj_0.File, _obj_0.encode_multipart
+      end
+      local file = File(assert(opts.filename, "missing file"))
+      local body, boundary = encode_multipart({
+        media = file
+      })
+      local out = assert(self:_oauth_request("POST", "https://upload.twitter.com/1.1/media/upload.json", {
+        access_token = assert(opts.access_token or self.access_token, "missing access token"),
+        access_token_secret = opts.access_token_secret or self.access_token_secret,
+        body = body,
+        headers = {
+          ["Content-Type"] = "multipart/mixed; boundary=" .. tostring(boundary)
         }
       }))
       return from_json(out)
