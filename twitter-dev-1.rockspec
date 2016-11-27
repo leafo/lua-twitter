@@ -23,6 +23,7 @@ build = {
   type = "builtin",
   modules = {
     ["twitter"] = "twitter/init.lua",
+    ["twitter.multipart"] = "twitter/multipart.lua",
     ["twitter.util"] = "twitter/util.lua",
   }
 }
