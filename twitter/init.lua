@@ -209,12 +209,27 @@ do
       return out
     end,
     request_token = function(self)
-      local out = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/request_token", {
+      local out, err = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/request_token", {
         get = {
           oauth_callback = self.opts.oauth_callback
         }
       }))
-      return parse_query_string(out)
+      if out then
+        return parse_query_string(out)
+      else
+        return out, err
+      end
+    end,
+    sign_in_with_twitter_url = function(self)
+      local tokens, err = self:request_token()
+      if not (tokens) then
+        return nil, err
+      end
+      local url = "https://api.twitter.com/oauth/authenticate?" .. encode_query_string({
+        force_login = "true",
+        oauth_token = tokens.oauth_token
+      })
+      return url, tokens
     end,
     post_status = function(self, opts)
       if opts == nil then

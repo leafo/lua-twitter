@@ -198,13 +198,28 @@ class Twitter
     out
 
   request_token: =>
-    out = assert @_oauth_request "POST", "#{@api_url}/oauth/request_token", {
+    out, err = assert @_oauth_request "POST", "#{@api_url}/oauth/request_token", {
       get: {
         oauth_callback: @opts.oauth_callback
       }
     }
 
-    parse_query_string out
+    if out
+      parse_query_string out
+    else
+      out, err
+
+  sign_in_with_twitter_url: =>
+    tokens, err = @request_token!
+    unless tokens
+      return nil, err
+
+    url = "https://api.twitter.com/oauth/authenticate?" .. encode_query_string {
+      force_login: "true"
+      oauth_token: tokens.oauth_token
+    }
+
+    url, tokens
 
   post_status: (opts={}) =>
     assert opts.status, "missing status"
