@@ -197,10 +197,10 @@ class Twitter
 
     out
 
-  request_token: =>
-    out, err = assert @_oauth_request "POST", "#{@api_url}/oauth/request_token", {
+  request_token: (opts) =>
+    out, err = @_oauth_request "POST", "#{@api_url}/oauth/request_token", {
       get: {
-        oauth_callback: @opts.oauth_callback
+        oauth_callback: opts and opts.oauth_callback or @opts.oauth_callback
       }
     }
 
@@ -220,6 +220,22 @@ class Twitter
     }
 
     url, tokens
+
+  verify_sign_in_token: (oauth_token, oauth_verifier) =>
+    res, status = @_oauth_request "POST", "#{@api_url}/oauth/access_token", {
+      access_token: oauth_token
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+      post: {
+        :oauth_verifier
+      }
+    }
+
+    if res
+      parse_query_string(res)
+    else
+      nil, status
 
   post_status: (opts={}) =>
     assert opts.status, "missing status"

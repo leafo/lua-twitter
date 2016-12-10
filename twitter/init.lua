@@ -208,12 +208,12 @@ do
       end
       return out
     end,
-    request_token = function(self)
-      local out, err = assert(self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/request_token", {
+    request_token = function(self, opts)
+      local out, err = self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/request_token", {
         get = {
-          oauth_callback = self.opts.oauth_callback
+          oauth_callback = opts and opts.oauth_callback or self.opts.oauth_callback
         }
-      }))
+      })
       if out then
         return parse_query_string(out)
       else
@@ -230,6 +230,22 @@ do
         oauth_token = tokens.oauth_token
       })
       return url, tokens
+    end,
+    verify_sign_in_token = function(self, oauth_token, oauth_verifier)
+      local res, status = self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/access_token", {
+        access_token = oauth_token,
+        headers = {
+          ["Content-Type"] = "application/x-www-form-urlencoded"
+        },
+        post = {
+          oauth_verifier = oauth_verifier
+        }
+      })
+      if res then
+        return parse_query_string(res)
+      else
+        return nil, status
+      end
     end,
     post_status = function(self, opts)
       if opts == nil then
