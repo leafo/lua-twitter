@@ -147,23 +147,33 @@ do
       return out.access_token
     end,
     _request = function(self, method, url, url_params)
-      local access_token = self:get_access_token()
-      local out = { }
       url = tostring(self.api_url) .. tostring(url)
-      if url_params then
-        url = url .. ("?" .. encode_query_string(url_params))
+      local res, err
+      if self.provided_access_token then
+        res, err = self:_oauth_request(method, url, {
+          get = url_params
+        })
+      else
+        local access_token = self:get_access_token()
+        if url_params then
+          url = url .. ("?" .. encode_query_string(url_params))
+        end
+        local out = { }
+        local _, status = self:http_request({
+          url = url,
+          method = method,
+          sink = ltn12.sink.table(out),
+          headers = {
+            ["Authorization"] = "Bearer " .. tostring(access_token)
+          }
+        })
+        res, err = table.concat(out)
       end
-      local _, status = self:http_request({
-        url = url,
-        method = method,
-        sink = ltn12.sink.table(out),
-        headers = {
-          ["Authorization"] = "Bearer " .. tostring(access_token)
-        }
-      })
-      out = table.concat(out)
-      out = from_json(out)
-      return out, status
+      if res then
+        return from_json(res)
+      else
+        return res, err
+      end
     end,
     _oauth_request = function(self, method, url, opts)
       if opts == nil then
@@ -333,6 +343,7 @@ do
       if self.opts.access_token or self.opts.access_token_secret then
         self.access_token = assert(self.opts.access_token, "missing access token")
         self.access_token_secret = assert(self.opts.access_token_secret, "missing access_token_secret")
+        self.provided_access_token = true
       end
       if self.opts.consumer_key or self.opts.consumer_secret then
         self.consumer_key = assert(self.opts.consumer_key, "missing consumer_key")

@@ -12,6 +12,7 @@ class Twitter
     if @opts.access_token or @opts.access_token_secret
       @access_token = assert @opts.access_token, "missing access token"
       @access_token_secret = assert @opts.access_token_secret, "missing access_token_secret"
+      @provided_access_token = true
 
     if @opts.consumer_key or @opts.consumer_secret
       @consumer_key = assert @opts.consumer_key, "missing consumer_key"
@@ -133,25 +134,34 @@ class Twitter
 
   -- makes a request using an access token
   _request: (method, url, url_params) =>
-    access_token = @get_access_token!
-
-    out = {}
     url = "#{@api_url}#{url}"
-    if url_params
-      url ..= "?" .. encode_query_string url_params
 
-    _, status = @http_request {
-      :url
-      method: method
-      sink: ltn12.sink.table out
-      headers: {
-        "Authorization": "Bearer #{access_token}"
+    res, err = if @provided_access_token
+      -- we're using access token as part of oauth three-legged flow
+      @_oauth_request method, url, get: url_params
+    else
+      -- we're using our consumer key to make request
+      access_token = @get_access_token!
+
+      if url_params
+        url ..= "?" .. encode_query_string url_params
+
+      out = {}
+      _, status = @http_request {
+        :url
+        method: method
+        sink: ltn12.sink.table out
+        headers: {
+          "Authorization": "Bearer #{access_token}"
+        }
       }
-    }
 
-    out = table.concat out
-    out = from_json out
-    out, status
+      table.concat out
+
+    if res
+      from_json res
+    else
+      res, err
 
   -- makes a signed oauth request
   _oauth_request: (method, url, opts={}) =>
