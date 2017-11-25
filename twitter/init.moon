@@ -25,7 +25,10 @@ class Twitter
       @http_provider or= if ngx
         "lapis.nginx.http"
       else
-        "ssl.https"
+        if pcall -> require "http.compat.socket"
+          "http.compat.socket"
+        else
+          "ssl.https"
 
       @_http = if type(@http_provider) == "function"
         @http_provider!

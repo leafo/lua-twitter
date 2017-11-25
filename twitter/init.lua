@@ -22,7 +22,13 @@ do
           if ngx then
             return "lapis.nginx.http"
           else
-            return "ssl.https"
+            if pcall(function()
+              return require("http.compat.socket")
+            end) then
+              return "http.compat.socket"
+            else
+              return "ssl.https"
+            end
           end
         end)()
         if type(self.http_provider) == "function" then
