@@ -11,6 +11,10 @@ subclass = (cls, other_cls) ->
 
 class File
   new: (@fname, @_mime) =>
+
+  basename: =>
+    @fname\match "[^/]+$"
+
   mime: =>
     unless @_mime
       pcall ->
@@ -60,7 +64,7 @@ encode_multipart = (params) ->
     buffer = { 'Content-Disposition: form-data; name="'.. k .. '"' }
 
     content = if type(v) == "table" and subclass File, v.__class
-      buffer[1] ..= '; filename="' .. escape_uri(v.fname) .. '"'
+      buffer[1] ..= '; filename="' .. escape_uri(v\basename!) .. '"'
       insert buffer, "Content-type: #{v\mime!}"
       v\content!
     else

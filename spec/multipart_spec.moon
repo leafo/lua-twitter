@@ -40,3 +40,24 @@ describe "twitter.multipart", ->
         ""
       }, "\r\n"), payload
 
+    it "encodes file from path", ->
+      file = File "spec/test_file.json"
+      payload, boundary = encode_multipart {
+        {"blob", file}
+      }
+
+      assert.truthy payload
+      assert.truthy boundary
+
+
+      assert.same table.concat({
+        "--#{boundary}"
+        'Content-Disposition: form-data; name="blob"; filename="test_file.json"'
+        'Content-type: application/json'
+        ""
+        '{"test": "test"}\n'
+        "--#{boundary}--"
+        ""
+      }, "\r\n"), payload
+
+

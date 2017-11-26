@@ -6,10 +6,23 @@ do
   insert, concat = _obj_0.insert, _obj_0.concat
 end
 math.randomseed(os.time())
+local subclass
+subclass = function(cls, other_cls)
+  if not (other_cls) then
+    return false
+  end
+  if cls == other_cls then
+    return true
+  end
+  return subclass(cls, other_cls.__parent)
+end
 local File
 do
   local _class_0
   local _base_0 = {
+    basename = function(self)
+      return self.fname:match("[^/]+$")
+    end,
     mime = function(self)
       if not (self._mime) then
         pcall(function()
@@ -52,6 +65,49 @@ do
   })
   _base_0.__class = _class_0
   File = _class_0
+end
+local StringFile
+do
+  local _class_0
+  local _parent_0 = File
+  local _base_0 = {
+    content = function(self)
+      return self._content
+    end
+  }
+  _base_0.__index = _base_0
+  setmetatable(_base_0, _parent_0.__base)
+  _class_0 = setmetatable({
+    __init = function(self, content, ...)
+      self._content = assert(content, "missing content for string file")
+      return _class_0.__parent.__init(self, ...)
+    end,
+    __base = _base_0,
+    __name = "StringFile",
+    __parent = _parent_0
+  }, {
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil then
+        local parent = rawget(cls, "__parent")
+        if parent then
+          return parent[name]
+        end
+      else
+        return val
+      end
+    end,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  if _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
+  StringFile = _class_0
 end
 local rand_string
 rand_string = function(len)
@@ -105,9 +161,9 @@ encode_multipart = function(params)
         'Content-Disposition: form-data; name="' .. k .. '"'
       }
       local content
-      if type(v) == "table" and v.__class == File then
+      if type(v) == "table" and subclass(File, v.__class) then
         local _update_0 = 1
-        buffer[_update_0] = buffer[_update_0] .. ('; filename="' .. v.fname .. '"')
+        buffer[_update_0] = buffer[_update_0] .. ('; filename="' .. escape_uri(v:basename()) .. '"')
         insert(buffer, "Content-type: " .. tostring(v:mime()))
         content = v:content()
       else
@@ -162,5 +218,6 @@ encode_multipart = function(params)
 end
 return {
   encode_multipart = encode_multipart,
-  File = File
+  File = File,
+  StringFile = StringFile
 }
