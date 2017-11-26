@@ -263,8 +263,29 @@ class Twitter
     from_json out
 
   post_media_upload: (opts={}) =>
-    import File, encode_multipart from require "twitter.multipart"
-    file = File assert opts.filename, "missing file"
+    import File, StringFile, encode_multipart from require "twitter.multipart"
+
+    file = if opts.url
+      out = {}
+      protocol = if url.match("^https") and @http_provider == "ssl.https"
+        "sslv23"
+
+      success, status = assert @http!.request {
+        url: opts.url
+        sink: ltn12.sink.table out
+        method: "GET"
+        :protocol
+      }
+
+      if status != 200
+        return nil, "got bad status when fetching media: #{status}"
+
+      print "Got the file!"
+
+      filename = opts.filename or opts.url\match "[^/]+%.%w+$"
+      StringFile table.concat(out), assert(filename, "failed to extract filename from url")
+    else
+      File assert opts.filename, "missing file"
 
     body, boundary = encode_multipart {
       media: file

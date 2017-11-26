@@ -273,12 +273,29 @@ do
       if opts == nil then
         opts = { }
       end
-      local File, encode_multipart
+      local File, StringFile, encode_multipart
       do
         local _obj_0 = require("twitter.multipart")
-        File, encode_multipart = _obj_0.File, _obj_0.encode_multipart
+        File, StringFile, encode_multipart = _obj_0.File, _obj_0.StringFile, _obj_0.encode_multipart
       end
-      local file = File(assert(opts.filename, "missing file"))
+      local file
+      if opts.url then
+        local out = { }
+        local success, status = assert(self:http().request({
+          url = opts.url,
+          sink = ltn12.sink.table(out),
+          method = "GET",
+          protocol = "sslv23"
+        }))
+        if status ~= 200 then
+          return nil, "got bad status when fetching media: " .. tostring(status)
+        end
+        print("Got the file!")
+        local filename = opts.filename or opts.url:match("[^/]+%.%w+$")
+        file = StringFile(table.concat(out), assert(filename, "failed to extract filename from url"))
+      else
+        file = File(assert(opts.filename, "missing file"))
+      end
       local body, boundary = encode_multipart({
         media = file
       })
