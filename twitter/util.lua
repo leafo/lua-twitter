@@ -78,8 +78,10 @@ do
           if not (self.bytes[k + 1]) then
             break
           end
-          self.bytes[k + 1] = self.bytes[k + 1] - 1
-          self.bytes[k] = self.bytes[k] + 256
+          local _update_0 = k + 1
+          self.bytes[_update_0] = self.bytes[_update_0] - 1
+          local _update_1 = k
+          self.bytes[_update_1] = self.bytes[_update_1] + 256
         end
         k = k + 1
       end
