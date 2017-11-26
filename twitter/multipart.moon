@@ -4,6 +4,11 @@ import insert, concat from table
 
 math.randomseed os.time!
 
+subclass = (cls, other_cls) ->
+  return false unless other_cls
+  return true if cls == other_cls
+  subclass cls, other_cls.__parent
+
 class File
   new: (@fname, @_mime) =>
   mime: =>
@@ -18,6 +23,13 @@ class File
     if file = assert io.open(@fname), "Failed to open file `#{@fname}`"
       with file\read "*a"
         file\close!
+
+class StringFile extends File
+  new: (content, ...) =>
+    @_content = assert content, "missing content for string file"
+    super ...
+
+  content: => @_content
 
 rand_string = (len) ->
   shuffled = for i=1,len
@@ -47,9 +59,8 @@ encode_multipart = (params) ->
     k = escape_uri k
     buffer = { 'Content-Disposition: form-data; name="'.. k .. '"' }
 
-    content = if type(v) == "table" and v.__class == File
-      -- how is this encoded?
-      buffer[1] ..= '; filename="' .. v.fname .. '"'
+    content = if type(v) == "table" and subclass File, v.__class
+      buffer[1] ..= '; filename="' .. escape_uri(v.fname) .. '"'
       insert buffer, "Content-type: #{v\mime!}"
       v\content!
     else
@@ -74,4 +85,4 @@ encode_multipart = (params) ->
    "\r\n", "--", boundary, "--", "\r\n"
   }), boundary
 
-{ :encode_multipart, :File }
+{ :encode_multipart, :File, :StringFile }
