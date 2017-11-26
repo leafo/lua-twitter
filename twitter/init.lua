@@ -281,11 +281,15 @@ do
       local file
       if opts.url then
         local out = { }
+        local protocol
+        if url.match("^https") and self.http_provider == "ssl.https" then
+          protocol = "sslv23"
+        end
         local success, status = assert(self:http().request({
           url = opts.url,
           sink = ltn12.sink.table(out),
           method = "GET",
-          protocol = "sslv23"
+          protocol = protocol
         }))
         if status ~= 200 then
           return nil, "got bad status when fetching media: " .. tostring(status)
