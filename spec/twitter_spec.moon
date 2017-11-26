@@ -34,7 +34,10 @@ describe "twitter", ->
                 else
                   return res, status
 
-            error opts
+            error {
+              "Got an http request that we didn't stub"
+              opts
+            }
         }
 
 
@@ -68,4 +71,25 @@ describe "twitter", ->
       out = twitter\post_status status: "hi"
       assert.same {}, out
 
+    describe "oauth login", ->
+      it "sign_in_with_twitter_url", ->
+        responders["oauth/request_token"] = =>
+          "oauth_token=hello-world", 200
+
+        url = twitter\sign_in_with_twitter_url!
+        assert.same "https://api.twitter.com/oauth/authenticate?force_login=true&oauth_token=hello%2dworld", url
+
+      it "verify_sign_in_token", ->
+        responders["oauth/access_token"] = =>
+          "hello=world", 200
+
+        result = twitter\verify_sign_in_token "hello-world", "some-verifier"
+
+        assert.same {
+          {"hello", "world"}
+          hello: "world"
+        }, result
+
+        request = assert unpack http_requests
+        assert.same "https://api.twitter.com/oauth/access_token", request.url
 
