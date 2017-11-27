@@ -282,7 +282,7 @@ do
       if opts.url then
         local out = { }
         local protocol
-        if url.match("^https") and self.http_provider == "ssl.https" then
+        if opts.url.match("^https") and self.http_provider == "ssl.https" then
           protocol = "sslv23"
         end
         local success, status = assert(self:http().request({

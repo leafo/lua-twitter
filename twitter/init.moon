@@ -267,7 +267,7 @@ class Twitter
 
     file = if opts.url
       out = {}
-      protocol = if url.match("^https") and @http_provider == "ssl.https"
+      protocol = if opts.url.match("^https") and @http_provider == "ssl.https"
         "sslv23"
 
       success, status = assert @http!.request {
