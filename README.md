@@ -187,6 +187,16 @@ assert(twitter:post_status {
 })
 ```
 
+#### Uploading from URL
+
+You can also upload an image directly from URL by passing in the URL of the
+image to `url`.
+
+```lua
+local media = assert(twitter:post_media_upload({
+  url: "http://leafo.net/hi.png"
+}))
+```
 
 # Contact
 
