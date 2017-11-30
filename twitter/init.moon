@@ -270,7 +270,7 @@ class Twitter
       protocol = if opts.url\match("^https") and @http_provider == "ssl.https"
         "sslv23"
 
-      success, status = assert @http!.request {
+      success, status, res_headers = assert @http!.request {
         url: opts.url
         sink: ltn12.sink.table out
         method: "GET"
@@ -280,8 +280,10 @@ class Twitter
       if status != 200
         return nil, "got bad status when fetching media: #{status}"
 
+      mime_type = res_headers["content-type"]
+
       filename = opts.filename or opts.url\match "[^/]+%.%w+$"
-      StringFile table.concat(out), assert(filename, "failed to extract filename from url")
+      StringFile table.concat(out), assert(filename, "failed to extract filename from url"), mime_type
     else
       File assert opts.filename, "missing file"
 
