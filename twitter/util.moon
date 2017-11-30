@@ -1,5 +1,5 @@
--- luasocket's escape_uri function does not work, so we provide our own implementation
-escape_uri = ngx and ngx.escape_uri or (str) ->
+-- luasocket's escape_uri & ngix's function doesn't work with twitter api, so we provide our own implementation
+escape_uri = (str) ->
   (str\gsub "([^A-Za-z0-9_%.-])", (c) -> "%%%02X"\format c\byte!)
 
 generate_key = (...) ->
