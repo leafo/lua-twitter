@@ -322,6 +322,9 @@ do
     get_user_timeline = function(self, opts)
       return self:_request("GET", "/1.1/statuses/user_timeline.json", opts)
     end,
+    get_status = function(self, opts)
+      return self:_request("GET", "/1.1/statuses/show.json", opts)
+    end,
     user_timeline_each_tweet = function(self, opts)
       if opts == nil then
         opts = { }

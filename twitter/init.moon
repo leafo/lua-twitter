@@ -309,6 +309,9 @@ class Twitter
   get_user_timeline: (opts) =>
     @_request "GET", "/1.1/statuses/user_timeline.json", opts
 
+  get_status: (opts) =>
+    @_request "GET", "/1.1/statuses/show.json", opts
+
   user_timeline_each_tweet:  (opts={}) =>
     opts.count or= 200
     opts_clone = {k,v for k,v in pairs opts}
