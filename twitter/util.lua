@@ -1,6 +1,6 @@
 local escape_uri
 escape_uri = function(str)
-  return (str:gsub("([^A-Za-z0-9._~-])", function(c)
+  return (tostring(str):gsub("([^A-Za-z0-9._~-])", function(c)
     return ("%%%02X"):format(c:byte())
   end))
 end

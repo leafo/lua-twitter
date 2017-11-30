@@ -1,6 +1,6 @@
 -- luasocket's escape_uri & ngix's function doesn't work with twitter api, so we provide our own implementation
 escape_uri = (str) ->
-  (str\gsub "([^A-Za-z0-9._~-])", (c) -> "%%%02X"\format c\byte!)
+  (tostring(str)\gsub "([^A-Za-z0-9._~-])", (c) -> "%%%02X"\format c\byte!)
 
 encode_query_string = (t, sep="&") ->
   i = 0
