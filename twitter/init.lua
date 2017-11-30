@@ -1,15 +1,18 @@
-local encode_query_string, parse_query_string, from_json
+local parse_query_string, from_json
 do
   local _obj_0 = require("lapis.util")
-  encode_query_string, parse_query_string, from_json = _obj_0.encode_query_string, _obj_0.parse_query_string, _obj_0.from_json
+  parse_query_string, from_json = _obj_0.parse_query_string, _obj_0.from_json
 end
 local hmac_sha1, encode_base64
 do
   local _obj_0 = require("lapis.util.encoding")
   hmac_sha1, encode_base64 = _obj_0.hmac_sha1, _obj_0.encode_base64
 end
-local escape_uri
-escape_uri = require("twitter.util").escape_uri
+local escape_uri, encode_query_string
+do
+  local _obj_0 = require("twitter.util")
+  escape_uri, encode_query_string = _obj_0.escape_uri, _obj_0.encode_query_string
+end
 local ltn12 = require("ltn12")
 local Twitter
 do

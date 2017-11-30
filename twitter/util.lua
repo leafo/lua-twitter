@@ -1,8 +1,47 @@
 local escape_uri
 escape_uri = function(str)
-  return (str:gsub("([^A-Za-z0-9_%.-])", function(c)
+  return (str:gsub("([^A-Za-z0-9._~-])", function(c)
     return ("%%%02X"):format(c:byte())
   end))
+end
+local encode_query_string
+encode_query_string = function(t, sep)
+  if sep == nil then
+    sep = "&"
+  end
+  local i = 0
+  local buf = { }
+  for k, v in pairs(t) do
+    local _continue_0 = false
+    repeat
+      if type(k) == "number" and type(v) == "table" then
+        k, v = v[1], v[2]
+        if v == nil then
+          v = true
+        end
+      end
+      if v == false then
+        _continue_0 = true
+        break
+      end
+      buf[i + 1] = escape_uri(k)
+      if v == true then
+        buf[i + 2] = sep
+        i = i + 2
+      else
+        buf[i + 2] = "="
+        buf[i + 3] = escape_uri(v)
+        buf[i + 4] = sep
+        i = i + 4
+      end
+      _continue_0 = true
+    until true
+    if not _continue_0 then
+      break
+    end
+  end
+  buf[i] = nil
+  return table.concat(buf)
 end
 local generate_key
 generate_key = function(...)
@@ -176,5 +215,6 @@ end
 return {
   BigInt = BigInt,
   generate_key = generate_key,
-  escape_uri = escape_uri
+  escape_uri = escape_uri,
+  encode_query_string = encode_query_string
 }

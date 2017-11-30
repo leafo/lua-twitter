@@ -1,6 +1,30 @@
 -- luasocket's escape_uri & ngix's function doesn't work with twitter api, so we provide our own implementation
 escape_uri = (str) ->
-  (str\gsub "([^A-Za-z0-9_%.-])", (c) -> "%%%02X"\format c\byte!)
+  (str\gsub "([^A-Za-z0-9._~-])", (c) -> "%%%02X"\format c\byte!)
+
+encode_query_string = (t, sep="&") ->
+  i = 0
+  buf = {}
+  for k,v in pairs t
+    if type(k) == "number" and type(v) == "table"
+      {k,v} = v
+      v = true if v == nil -- symmetrical with parse
+
+    if v == false
+      continue
+
+    buf[i + 1] = escape_uri k
+    if v == true
+      buf[i + 2] = sep
+      i += 2
+    else
+      buf[i + 2] = "="
+      buf[i + 3] = escape_uri v
+      buf[i + 4] = sep
+      i += 4
+
+  buf[i] = nil
+  table.concat buf
 
 generate_key = (...) ->
   unpack = table.unpack or _G.unpack
@@ -110,5 +134,5 @@ class BigInt
 
     @, r
 
-{:BigInt, :generate_key, :escape_uri}
+{:BigInt, :generate_key, :escape_uri, :encode_query_string}
 
