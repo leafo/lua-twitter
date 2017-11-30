@@ -282,7 +282,7 @@ do
       if opts.url then
         local out = { }
         local protocol
-        if opts.url.match("^https") and self.http_provider == "ssl.https" then
+        if opts.url:match("^https") and self.http_provider == "ssl.https" then
           protocol = "sslv23"
         end
         local success, status = assert(self:http().request({
@@ -294,7 +294,6 @@ do
         if status ~= 200 then
           return nil, "got bad status when fetching media: " .. tostring(status)
         end
-        print("Got the file!")
         local filename = opts.filename or opts.url:match("[^/]+%.%w+$")
         file = StringFile(table.concat(out), assert(filename, "failed to extract filename from url"))
       else

@@ -267,7 +267,7 @@ class Twitter
 
     file = if opts.url
       out = {}
-      protocol = if opts.url.match("^https") and @http_provider == "ssl.https"
+      protocol = if opts.url\match("^https") and @http_provider == "ssl.https"
         "sslv23"
 
       success, status = assert @http!.request {
@@ -279,8 +279,6 @@ class Twitter
 
       if status != 200
         return nil, "got bad status when fetching media: #{status}"
-
-      print "Got the file!"
 
       filename = opts.filename or opts.url\match "[^/]+%.%w+$"
       StringFile table.concat(out), assert(filename, "failed to extract filename from url")
