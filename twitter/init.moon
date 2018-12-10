@@ -140,7 +140,7 @@ class Twitter
   _request: (method, url, url_params) =>
     url = "#{@api_url}#{url}"
 
-    res, err = if @provided_access_token
+    res, err, status = if @provided_access_token
       -- we're using access token as part of oauth three-legged flow
       @_oauth_request method, url, get: url_params
     else
@@ -151,7 +151,8 @@ class Twitter
         url ..= "?" .. encode_query_string url_params
 
       out = {}
-      _, status = @http_request {
+
+      _, s = @http_request {
         :url
         method: method
         sink: ltn12.sink.table out
@@ -160,12 +161,12 @@ class Twitter
         }
       }
 
-      table.concat out
+      table.concat(out), nil, s
 
     if res
       from_json res
     else
-      res, err
+      res, err, status
 
   -- makes a signed oauth request
   _oauth_request: (method, url, opts={}) =>
@@ -207,9 +208,9 @@ class Twitter
     out = table.concat(out)
 
     unless status == 200
-      return nil, out != "" and out or "status #{status}"
+      return nil, out != "" and out or "status #{status}", status
 
-    out
+    out, status
 
   request_token: (opts) =>
     out, err = @_oauth_request "POST", "#{@api_url}/oauth/request_token", {

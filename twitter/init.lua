@@ -151,9 +151,9 @@ do
     end,
     _request = function(self, method, url, url_params)
       url = tostring(self.api_url) .. tostring(url)
-      local res, err
+      local res, err, status
       if self.provided_access_token then
-        res, err = self:_oauth_request(method, url, {
+        res, err, status = self:_oauth_request(method, url, {
           get = url_params
         })
       else
@@ -162,7 +162,7 @@ do
           url = url .. ("?" .. encode_query_string(url_params))
         end
         local out = { }
-        local _, status = self:http_request({
+        local _, s = self:http_request({
           url = url,
           method = method,
           sink = ltn12.sink.table(out),
@@ -170,12 +170,12 @@ do
             ["Authorization"] = "Bearer " .. tostring(access_token)
           }
         })
-        res, err = table.concat(out)
+        res, err, status = table.concat(out), nil, s
       end
       if res then
         return from_json(res)
       else
-        return res, err
+        return res, err, status
       end
     end,
     _oauth_request = function(self, method, url, opts)
@@ -217,9 +217,9 @@ do
       })
       out = table.concat(out)
       if not (status == 200) then
-        return nil, out ~= "" and out or "status " .. tostring(status)
+        return nil, out ~= "" and out or "status " .. tostring(status), status
       end
-      return out
+      return out, status
     end,
     request_token = function(self, opts)
       local out, err = self:_oauth_request("POST", tostring(self.api_url) .. "/oauth/request_token", {
