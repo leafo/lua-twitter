@@ -13,6 +13,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@master
+    - name: Install readline
+      run: apt-get install libreadline-dev
     - name: Install lua ${{ matrix.lua_version }}
       run: |
         curl http://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz | tar xz
