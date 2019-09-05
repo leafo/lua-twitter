@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/leafo/lua-twitter.svg?branch=master)](https://travis-ci.org/leafo/lua-twitter)
 
 
-[![Actions Status](https://github.com/leafo/lua-twitter/workflows/CI/badge.svg)](https://github.com/leafo/lua-twitter/actions)
+[![Actions Status](https://github.com/leafo/lua-twitter/workflows/test/badge.svg)](https://github.com/leafo/lua-twitter/actions)
 
 
 A Lua library for working with the Twitter API.

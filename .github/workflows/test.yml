@@ -1,4 +1,4 @@
-name: CI
+name: test
 
 on: [push]
 
@@ -10,7 +10,7 @@ jobs:
         lua_version: ["5.1.5"]
 
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@master
     - name: Install readline
@@ -25,10 +25,6 @@ jobs:
         cd lua-${{ matrix.lua_version }}
         make -j linux
         make -j INSTALL_TOP="$LUA_INSTALL_DIR" install;
-    - name: See what's up
-      run: |
-        pwd
-        find .
     - name: Install luarocks ${{ matrix.luarocks_version }}
       run: |
         mkdir -p .install
