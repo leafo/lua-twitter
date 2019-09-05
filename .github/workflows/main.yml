@@ -49,3 +49,7 @@ jobs:
         luarocks install moonscript
         luarocks make
         busted -o utfTerminal
+    - name: test
+      run: |
+        eval $(.luarocks/bin/luarocks path)
+        busted -o utfTerminal
