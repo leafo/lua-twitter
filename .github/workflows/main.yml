@@ -30,7 +30,7 @@ jobs:
         mkdir -p .luarocks
         cd .install
         curl -L https://luarocks.org/releases/luarocks-${{ matrix.luarocks_version }}.tar.gz | tar xz
-        cd luarocks-${{ matrix.lua_version }}
+        cd luarocks-${{ matrix.luarocks_version }}
         ./configure --with-lua-bin="../../.lua/bin" --prefix="../../.luarocks"
     - name: See what's up
       run: |
