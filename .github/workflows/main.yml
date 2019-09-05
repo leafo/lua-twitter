@@ -48,4 +48,4 @@ jobs:
         luarocks install busted
         luarocks install moonscript
         luarocks make
-        busted
+        busted -o utfTerminal
