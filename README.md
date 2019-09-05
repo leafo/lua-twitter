@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/leafo/lua-twitter.svg?branch=master)](https://travis-ci.org/leafo/lua-twitter)
 
+
+[![Actions Status](https://github.com/leafo/lua-twitter/workflows/CI/badge.svg)](https://github.com/{owner}/{repo}/actions)
+
+
 A Lua library for working with the Twitter API.
 
 This library is designed to work with either LuaSocket or OpenResty's
