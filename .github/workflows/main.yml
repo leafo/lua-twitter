@@ -4,19 +4,19 @@ on: [push]
 
 jobs:
   test:
-  
     strategy:
       matrix:
         luarocks_version: ["3.2.0"]
-        lua_version: ["5.1"]
+        lua_version: ["5.1.5"]
 
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@master
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
+    - name: Install lua ${{ matrix.lua_version }}
       run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        curl http://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz | tar xz
+        cd ${{ matrix.lua_version }}
+        make -j linux
+        make -j INSTALL_TOP="install/lua" install;
+
