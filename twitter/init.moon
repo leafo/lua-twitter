@@ -230,8 +230,8 @@ class Twitter
       return nil, err
 
     url = "https://api.twitter.com/oauth/authenticate?" .. encode_query_string {
-      force_login: "true"
-      oauth_token: tokens.oauth_token
+      {"force_login", "true"}
+      {"oauth_token", tokens.oauth_token}
     }
 
     url, tokens

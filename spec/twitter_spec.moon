@@ -77,7 +77,7 @@ describe "twitter", ->
           "oauth_token=hello-world", 200
 
         url = twitter\sign_in_with_twitter_url!
-        assert.same "https://api.twitter.com/oauth/authenticate?force_login=true&oauth_token=hello%2dworld", url
+        assert.same "https://api.twitter.com/oauth/authenticate?force_login=true&oauth_token=hello-world", url
 
       it "verify_sign_in_token", ->
         responders["oauth/access_token"] = =>
