@@ -44,5 +44,7 @@ jobs:
       run: |
         pwd
         find .
+        .luarocks/bin/luarocks
+        .luarocks/bin/luarocks path
 
 
