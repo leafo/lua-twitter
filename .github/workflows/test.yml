@@ -26,8 +26,8 @@ jobs:
         cd .install
         git clone https://github.com/openresty/luajit2.git
         cd luajit2
-        make
-        sudo make install
+        make -j
+        make -j install PREFIX="$LUA_INSTALL_DIR"
 
     - name: Install lua ${{ matrix.lua_version }}
       if: startsWith(matrix.lua_version, '5.')
