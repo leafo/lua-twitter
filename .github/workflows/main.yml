@@ -24,6 +24,10 @@ jobs:
         cd lua-${{ matrix.lua_version }}
         make -j linux
         make -j INSTALL_TOP="../../.lua" install;
+    - name: See what's up
+      run: |
+        pwd
+        find .
     - name: Install luarocks ${{ matrix.luarocks_version }}
       run: |
         mkdir -p .install
@@ -32,10 +36,6 @@ jobs:
         curl -L https://luarocks.org/releases/luarocks-${{ matrix.luarocks_version }}.tar.gz | tar xz
         cd luarocks-${{ matrix.luarocks_version }}
         ./configure --with-lua-bin="../../.lua/bin" --prefix="../../.luarocks"
-    - name: See what's up
-      run: |
-        pwd
-        find .
 
 
 
