@@ -42,9 +42,10 @@ jobs:
         # make bootstrap
         make
         make install
-    - name: install moonscript
+    - name: build
       run: |
-        .luarocks/bin/luarocks path
-        .luarocks/bin/luarocks install moonscript
-
-
+        eval $(.luarocks/bin/luarocks path)
+        luarocks install busted
+        luarocks install moonscript
+        luarocks make
+        busted
