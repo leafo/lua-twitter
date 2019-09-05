@@ -17,6 +17,8 @@ jobs:
       run: sudo apt-get install libreadline-dev
     - name: Install lua ${{ matrix.lua_version }}
       run: |
+        mkdir -p .install
+        cd .install
         curl http://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz | tar xz
         cd lua-${{ matrix.lua_version }}
         mkdir -p "../build/lua"
@@ -25,7 +27,7 @@ jobs:
     - name: See what's up
       run: |
         pwd
-        ls
+        find .
 
 
 
