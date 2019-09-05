@@ -40,11 +40,8 @@ jobs:
         cd luarocks-${{ matrix.luarocks_version }}
         ./configure --with-lua-bin="${LUA_INSTALL_DIR}/bin" --prefix="$LUAROCKS_INSTALL_DIR"
         make bootstrap
-    - name: See what's up
+    - name: install moonscript
       run: |
-        pwd
-        find .
-        .luarocks/bin/luarocks
-        .luarocks/bin/luarocks path
+        .luarocks/bin/luarocks install moonscript
 
 
