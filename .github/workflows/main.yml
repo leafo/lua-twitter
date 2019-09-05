@@ -18,12 +18,13 @@ jobs:
     - name: Install lua ${{ matrix.lua_version }}
       run: |
         mkdir -p .install
-        mkdir -p .lua
+        LUA_INSTALL_DIR="$(pwd)/.lua"
+        mkdir -p "$LUA_INSTALL_DIR"
         cd .install
         curl http://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz | tar xz
         cd lua-${{ matrix.lua_version }}
         make -j linux
-        make -j INSTALL_TOP="../../.lua" install;
+        make -j INSTALL_TOP="$LUA_INSTALL_DIR" install;
     - name: See what's up
       run: |
         pwd
@@ -31,11 +32,13 @@ jobs:
     - name: Install luarocks ${{ matrix.luarocks_version }}
       run: |
         mkdir -p .install
-        mkdir -p .luarocks
+        LUA_INSTALL_DIR="$(pwd)/.lua"
+        LUAROCKS_INSTALL_DIR="$(pwd)/.luarocks"
+        mkdir -p "$LUAROCKS_INSTALL_DIR"
         cd .install
         curl -L https://luarocks.org/releases/luarocks-${{ matrix.luarocks_version }}.tar.gz | tar xz
         cd luarocks-${{ matrix.luarocks_version }}
-        ./configure --with-lua-bin="../../.lua/bin" --prefix="../../.luarocks"
+        ./configure --with-lua-bin="${LUA_INSTALL_DIR}/bin" --prefix="$LUAROCKS_INSTALL_DIR"
 
 
 
