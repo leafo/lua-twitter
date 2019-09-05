@@ -25,6 +25,7 @@ jobs:
         mkdir -p "$LUA_INSTALL_DIR"
         cd .install
         git clone https://github.com/openresty/luajit2.git
+        cd luajit2
         make
         sudo make install
 
