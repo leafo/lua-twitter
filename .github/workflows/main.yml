@@ -39,9 +39,12 @@ jobs:
         curl -L https://luarocks.org/releases/luarocks-${{ matrix.luarocks_version }}.tar.gz | tar xz
         cd luarocks-${{ matrix.luarocks_version }}
         ./configure --with-lua-bin="${LUA_INSTALL_DIR}/bin" --prefix="$LUAROCKS_INSTALL_DIR"
-        make bootstrap
+        # make bootstrap
+        make
+        make install
     - name: install moonscript
       run: |
+        .luarocks/bin/luarocks path
         .luarocks/bin/luarocks install moonscript
 
 
