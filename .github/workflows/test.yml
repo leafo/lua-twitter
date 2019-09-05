@@ -7,15 +7,29 @@ jobs:
     strategy:
       matrix:
         luarocks_version: ["3.2.0"]
-        lua_version: ["5.1.5"]
+        lua_version: ["5.1.5", "luajit-openresty"]
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@master
+
     - name: Install readline
       run: sudo apt-get install libreadline-dev
+
+    - name: Install luajit
+      if: matrix.lua_version == 'luajit-openresty'
+      run: |
+        mkdir -p .install
+        LUA_INSTALL_DIR="$(pwd)/.lua"
+        mkdir -p "$LUA_INSTALL_DIR"
+        cd .install
+        git clone https://github.com/openresty/luajit2.git
+        make
+        sudo make install
+
     - name: Install lua ${{ matrix.lua_version }}
+      if: startsWith(matrix.lua_version, '5.')
       run: |
         mkdir -p .install
         LUA_INSTALL_DIR="$(pwd)/.lua"
@@ -25,6 +39,7 @@ jobs:
         cd lua-${{ matrix.lua_version }}
         make -j linux
         make -j INSTALL_TOP="$LUA_INSTALL_DIR" install;
+
     - name: Install luarocks ${{ matrix.luarocks_version }}
       run: |
         mkdir -p .install
@@ -38,6 +53,7 @@ jobs:
         # make bootstrap
         make
         make install
+
     - name: build
       run: |
         eval $(.luarocks/bin/luarocks path)
@@ -45,6 +61,7 @@ jobs:
         luarocks install moonscript
         luarocks make
         busted -o utfTerminal
+
     - name: test
       run: |
         eval $(.luarocks/bin/luarocks path)
