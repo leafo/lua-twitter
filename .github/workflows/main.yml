@@ -19,6 +19,13 @@ jobs:
       run: |
         curl http://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz | tar xz
         cd lua-${{ matrix.lua_version }}
+        mkdir -p "../build/lua"
         make -j linux
-        make -j INSTALL_TOP="install/lua" install;
+        make -j INSTALL_TOP="../build/lua" install;
+    - name: See what's up
+      run: |
+        pwd
+        ls
+
+
 
