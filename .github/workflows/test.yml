@@ -6,7 +6,7 @@ jobs:
   test:
     strategy:
       matrix:
-        luarocks_version: ["3.2.0"]
+        luarocks_version: ["3.2.1"]
         lua_version: ["5.1.5", "luajit-openresty"]
 
     runs-on: ubuntu-latest
