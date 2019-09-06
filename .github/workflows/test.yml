@@ -51,7 +51,7 @@ jobs:
         curl -L https://luarocks.org/releases/luarocks-${{ matrix.luarocks_version }}.tar.gz | tar xz
         cd luarocks-${{ matrix.luarocks_version }}
         ./configure --with-lua-bin="${LUA_INSTALL_DIR}/bin" --prefix="$LUAROCKS_INSTALL_DIR"
-        # make bootstrap
+        # make bootstrap # this will work on luarocks >= 3.2.1
         make
         make install
 
@@ -71,4 +71,4 @@ jobs:
     - name: upload
       run: |
         eval $(.luarocks/bin/luarocks path)
-        luarocks upload --api-key="${{ secrets.LUAROCKS_API_KEY }}" twitter-dev-1.rockspec
+        luarocks upload --force --api-key="${{ secrets.LUAROCKS_API_KEY }}" twitter-dev-1.rockspec
