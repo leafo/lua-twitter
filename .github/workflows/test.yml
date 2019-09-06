@@ -69,7 +69,6 @@ jobs:
         busted -o utfTerminal
 
     - name: upload
-      if: secrets.LUAROCKS_API_KEY
       run: |
         eval $(.luarocks/bin/luarocks path)
         luarocks upload --api-key="${{ secrets.LUAROCKS_API_KEY }}" twitter-dev-1.rockspec
