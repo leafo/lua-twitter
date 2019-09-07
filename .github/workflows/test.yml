@@ -27,6 +27,8 @@ jobs:
 
     - name: test
       run: |
+        echo $LUA_PATH
+        find . | grep -P -v '\.git/'
         busted -o utfTerminal
 
     - name: upload
