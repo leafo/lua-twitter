@@ -6,54 +6,18 @@ jobs:
   test:
     strategy:
       matrix:
-        luarocks_version: ["3.2.0"]
-        lua_version: ["5.1.5", "luajit-openresty"]
+        luaVersion: ["5.1.5", "luajit-openresty"]
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@master
 
-    - name: Install readline
-      run: sudo apt-get install libreadline-dev
+    - uses: leafo/gh-actions-lua/install-lua@master
+      with:
+        luaVersion: ${{ matrix.luaVersion }}
 
-    - name: Install luajit
-      if: matrix.lua_version == 'luajit-openresty'
-      run: |
-        mkdir -p .install
-        LUA_INSTALL_DIR="$(pwd)/.lua"
-        mkdir -p "$LUA_INSTALL_DIR"
-        cd .install
-        git clone https://github.com/openresty/luajit2.git
-        cd luajit2
-        make -j
-        make -j install PREFIX="$LUA_INSTALL_DIR"
-
-    - name: Install lua ${{ matrix.lua_version }}
-      if: startsWith(matrix.lua_version, '5.')
-      run: |
-        mkdir -p .install
-        LUA_INSTALL_DIR="$(pwd)/.lua"
-        mkdir -p "$LUA_INSTALL_DIR"
-        cd .install
-        curl http://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz | tar xz
-        cd lua-${{ matrix.lua_version }}
-        make -j linux
-        make -j INSTALL_TOP="$LUA_INSTALL_DIR" install;
-
-    - name: Install luarocks ${{ matrix.luarocks_version }}
-      run: |
-        mkdir -p .install
-        LUA_INSTALL_DIR="$(pwd)/.lua"
-        LUAROCKS_INSTALL_DIR="$(pwd)/.luarocks"
-        mkdir -p "$LUAROCKS_INSTALL_DIR"
-        cd .install
-        curl -L https://luarocks.org/releases/luarocks-${{ matrix.luarocks_version }}.tar.gz | tar xz
-        cd luarocks-${{ matrix.luarocks_version }}
-        ./configure --with-lua-bin="${LUA_INSTALL_DIR}/bin" --prefix="$LUAROCKS_INSTALL_DIR"
-        # make bootstrap # this will work on luarocks >= 3.2.1
-        make
-        make install
+    - uses: leafo/gh-actions-lua/install-luarocks@master
 
     - name: build
       run: |
