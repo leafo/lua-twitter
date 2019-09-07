@@ -239,8 +239,14 @@ do
         return nil, err
       end
       local url = "https://api.twitter.com/oauth/authenticate?" .. encode_query_string({
-        force_login = "true",
-        oauth_token = tokens.oauth_token
+        {
+          "force_login",
+          "true"
+        },
+        {
+          "oauth_token",
+          tokens.oauth_token
+        }
       })
       return url, tokens
     end,
