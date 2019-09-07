@@ -28,7 +28,8 @@ jobs:
     - name: test
       run: |
         echo $LUA_PATH
-        find . | grep -P -v '\.git/'
+        find . | grep -P -v '^./\.'
+        lua -e 'print(package.path)'
         busted -o utfTerminal
 
     - name: upload
