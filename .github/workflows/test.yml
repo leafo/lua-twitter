@@ -21,18 +21,14 @@ jobs:
 
     - name: build
       run: |
-        eval $(.luarocks/bin/luarocks path)
         luarocks install busted
         luarocks install moonscript
-        luarocks make
-        busted -o utfTerminal
+        luarocks make --pack-binary-rock
 
     - name: test
       run: |
-        eval $(.luarocks/bin/luarocks path)
         busted -o utfTerminal
 
     - name: upload
       run: |
-        eval $(.luarocks/bin/luarocks path)
         luarocks upload --force --api-key="${{ secrets.LUAROCKS_API_KEY }}" twitter-dev-1.rockspec
