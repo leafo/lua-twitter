@@ -23,7 +23,7 @@ jobs:
       run: |
         luarocks install busted
         luarocks install moonscript
-        luarocks make --pack-binary-rock
+        luarocks install twitter-dev-1.rockspec --only-deps
 
     - name: test
       run: |
