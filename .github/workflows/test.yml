@@ -23,13 +23,10 @@ jobs:
       run: |
         luarocks install busted
         luarocks install moonscript
-        luarocks install twitter-dev-1.rockspec --only-deps
+        luarocks make --pack-binary-rock
 
     - name: test
       run: |
-        echo $LUA_PATH
-        find . | grep -P -v '^./\.'
-        lua -e 'print(package.path)'
         busted -o utfTerminal
 
     - name: upload
