@@ -13,11 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - uses: leafo/gh-actions-lua/install-lua@master
+    - uses: leafo/gh-actions-lua@v2
       with:
         luaVersion: ${{ matrix.luaVersion }}
 
-    - uses: leafo/gh-actions-lua/install-luarocks@master
+    - uses: leafo/gh-actions-luarocks@v2
 
     - name: build
       run: |
