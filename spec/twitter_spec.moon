@@ -48,6 +48,60 @@ describe "twitter", ->
         consumer_secret: "xxx"
       }
 
+    it "handles error", ->
+      responders["oauth2/token"] = =>
+        to_json({
+          access_token: "cool-zone"
+        }), 200
+
+      err_object = {
+        errors: {
+          {
+            message: "Rate limit exceeded"
+            code: 88
+          }
+        }
+      }
+
+      responders["statuses/show.json"] = =>
+        to_json(err_object), 429
+
+      assert.same {
+        nil
+        "Rate limit exceeded"
+        err_object
+        429
+      }, { twitter\get_status id: "12345" }
+
+    it "handles multiple errors", ->
+      responders["oauth2/token"] = =>
+        to_json({
+          access_token: "cool-zone"
+        }), 200
+
+      err_object = {
+        errors: {
+          {
+            message: "Rate limit exceeded"
+            code: 88
+          }
+          {
+            message: "Could not authenticate you"
+            code: 32
+          }
+        }
+      }
+
+      responders["statuses/show.json"] = =>
+        to_json(err_object), 400
+
+      assert.same {
+        nil
+        "Twitter failed with status 400"
+        err_object
+        400
+      }, { twitter\get_status id: "12345" }
+
     it "get_user", ->
       responders["oauth2/token"] = =>
         to_json({
@@ -57,7 +111,7 @@ describe "twitter", ->
       responders["users/show.json"] = =>
         "{}", 200
 
-      out = twitter\get_user {
+      out = assert twitter\get_user {
         screen_name: "leafo"
       }
       assert.same {}, out

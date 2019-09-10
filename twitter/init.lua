@@ -173,10 +173,21 @@ do
         res, err, status = table.concat(out), nil, s
       end
       if res then
-        return from_json(res)
+        return from_json(res), status
       else
         return res, err, status
       end
+    end,
+    _handle_error = function(self, res, status)
+      if res and res.errors then
+        local error_message
+        if #res.errors == 1 then
+          error_message = res.errors[1].message
+        end
+        error_message = error_message or "Twitter failed with status " .. tostring(status)
+        return nil, error_message, res, status
+      end
+      return res, status
     end,
     _oauth_request = function(self, method, url, opts)
       if opts == nil then
@@ -323,13 +334,13 @@ do
       return from_json(out)
     end,
     get_user = function(self, opts)
-      return self:_request("GET", "/1.1/users/show.json", opts)
+      return self:_handle_error(self:_request("GET", "/1.1/users/show.json", opts))
     end,
     get_user_timeline = function(self, opts)
-      return self:_request("GET", "/1.1/statuses/user_timeline.json", opts)
+      return self:_handle_error(self:_request("GET", "/1.1/statuses/user_timeline.json", opts))
     end,
     get_status = function(self, opts)
-      return self:_request("GET", "/1.1/statuses/show.json", opts)
+      return self:_handle_error(self:_request("GET", "/1.1/statuses/show.json", opts))
     end,
     user_timeline_each_tweet = function(self, opts)
       if opts == nil then
@@ -347,7 +358,7 @@ do
       return coroutine.wrap(function()
         while true do
           local last_tweet
-          local _list_0 = self:get_user_timeline(opts_clone)
+          local _list_0 = assert(self:get_user_timeline(opts_clone))
           for _index_0 = 1, #_list_0 do
             local tweet = _list_0[_index_0]
             coroutine.yield(tweet)

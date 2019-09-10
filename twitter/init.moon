@@ -164,9 +164,20 @@ class Twitter
       table.concat(out), nil, s
 
     if res
-      from_json res
+      from_json(res), status
     else
       res, err, status
+
+  _handle_error: (res, status) =>
+    if res and res.errors
+      error_message = if #res.errors == 1
+        res.errors[1].message
+
+      error_message or= "Twitter failed with status #{status}"
+
+      return nil, error_message, res, status
+
+    res, status
 
   -- makes a signed oauth request
   _oauth_request: (method, url, opts={}) =>
@@ -305,13 +316,13 @@ class Twitter
 
 
   get_user: (opts) =>
-    @_request "GET", "/1.1/users/show.json", opts
+    @_handle_error @_request "GET", "/1.1/users/show.json", opts
 
   get_user_timeline: (opts) =>
-    @_request "GET", "/1.1/statuses/user_timeline.json", opts
+    @_handle_error @_request "GET", "/1.1/statuses/user_timeline.json", opts
 
   get_status: (opts) =>
-    @_request "GET", "/1.1/statuses/show.json", opts
+    @_handle_error @_request "GET", "/1.1/statuses/show.json", opts
 
   user_timeline_each_tweet:  (opts={}) =>
     opts.count or= 200
@@ -320,7 +331,7 @@ class Twitter
     coroutine.wrap ->
       while true
         local last_tweet
-        for tweet in *@get_user_timeline opts_clone
+        for tweet in *assert @get_user_timeline opts_clone
           coroutine.yield tweet
           last_tweet = tweet
 
