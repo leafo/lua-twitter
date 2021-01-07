@@ -1,26 +1,27 @@
 name: test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   test:
     strategy:
       matrix:
-        luaVersion: ["5.1.5", "luajit-openresty"]
+        luaVersion: ["5.1", "5.2", "5.3", "5.4", "luajit-openresty"]
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@master
 
-    - uses: leafo/gh-actions-lua@v2
+    - uses: leafo/gh-actions-lua@master
       with:
         luaVersion: ${{ matrix.luaVersion }}
 
-    - uses: leafo/gh-actions-luarocks@v2
+    - uses: leafo/gh-actions-luarocks@master
 
     - name: build
       run: |
+        luarocks install https://raw.githubusercontent.com/leafo/lua-cjson/master/lua-cjson-dev-1.rockspec
         luarocks install busted
         luarocks install moonscript
         luarocks make
@@ -29,6 +30,6 @@ jobs:
       run: |
         busted -o utfTerminal
 
-    - name: upload
-      run: |
-        luarocks upload --force --api-key="${{ secrets.LUAROCKS_API_KEY }}" twitter-dev-1.rockspec
+    # - name: upload
+    #   run: |
+    #     luarocks upload --force --api-key="${{ secrets.LUAROCKS_API_KEY }}" twitter-dev-1.rockspec
