@@ -14,6 +14,7 @@ do
   escape_uri, encode_query_string = _obj_0.escape_uri, _obj_0.encode_query_string
 end
 local ltn12 = require("ltn12")
+local VERSION = "1.0.0"
 local Twitter
 do
   local _class_0
@@ -409,5 +410,6 @@ do
   Twitter = _class_0
 end
 return {
-  Twitter = Twitter
+  Twitter = Twitter,
+  VERSION = VERSION
 }

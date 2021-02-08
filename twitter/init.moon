@@ -5,6 +5,8 @@ import escape_uri, encode_query_string from require "twitter.util"
 
 ltn12 = require "ltn12"
 
+VERSION = "1.0.0"
+
 class Twitter
   api_url: "https://api.twitter.com"
 
@@ -345,4 +347,4 @@ class Twitter
         opts_clone.max_id = id_int\to_decimal_string!
 
 
-{ :Twitter }
+{ :Twitter, :VERSION }
