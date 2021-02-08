@@ -1,4 +1,4 @@
-package = "twitter"
+package = "lua-twitter"
 version = "dev-1"
 
 source = {
